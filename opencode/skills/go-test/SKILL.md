@@ -55,13 +55,23 @@ Run and write tests for Go projects following best practices.
 
 | Task | Command |
 |------|---------|
-| Run all tests | `go test ./...` |
-| Verbose output | `go test -v ./...` |
-| With coverage | `go test -cover ./...` |
-| With race detection | `go test -race ./...` |
-| Run specific test | `go test -run TestName ./...` |
-| Run benchmarks | `go test -bench=. ./...` |
-| Force re-run | `go test -count=1 ./...` |
+| Run all tests | `go test -tags=integration,component,e2e ./...` |
+| Verbose output | `go test -tags=integration,component,e2e -v ./...` |
+| With coverage | `go test -tags=integration,component,e2e -cover ./...` |
+| With race detection | `go test -tags=integration,component,e2e -race ./...` |
+| Run specific test | `go test -tags=integration,component,e2e -run TestName ./...` |
+| Run benchmarks | `go test -tags=integration,component,e2e -bench=. ./...` |
+| Force re-run | `go test -tags=integration,component,e2e -count=1 ./...` |
+
+## Running Tests
+
+Always run tests with all three build tags:
+
+```bash
+go test -tags=integration,component,e2e ./...
+```
+
+Never omit the tags — tests gated behind `integration`, `component`, or `e2e` build tags will be silently skipped otherwise.
 
 ---
 
@@ -247,215 +257,15 @@ Pattern: Mock domain layer, verify exact arguments, verify error codes.
 
 ---
 
-# Running Tests
-
-## Basic Commands
-
-```bash
-# Unit tests only
-go test ./...
-
-# Unit tests with verbose output
-go test -v ./...
-
-# Unit tests with coverage
-go test -cover ./...
-
-# Unit tests with coverage report
-go test -coverprofile=coverage.out ./...
-go tool cover -html=coverage.out
-```
-
-## Running Single Tests
-
-```bash
-# Run specific test by name
-go test -v -run TestOrderRepository ./internal/infra/mysqlrepo/...
-
-# Run tests matching pattern
-go test -v -run "TestOrder.*" ./...
-
-# Run specific subtest
-go test -v -run "TestOrderRepository/creates_order" ./...
-```
-
----
-
-# Integration Tests
-
-Integration tests typically use build tags to separate from unit tests:
-
-```bash
-# Run integration tests (requires database)
-go test -tags=integration -v ./...
-
-# Run integration tests for specific package
-go test -tags=integration -v ./internal/infra/mysqlrepo/...
-
-# With database DSN
-TEST_MYSQL_DSN="root:pass@tcp(localhost:3306)/testdb?parseTime=true" \
-  go test -tags=integration -v ./...
-```
-
-## Docker-based Database for Tests
-
-```bash
-# Start MySQL container
-docker run -d --name test-mysql \
-  -e MYSQL_ROOT_PASSWORD=pass \
-  -e MYSQL_DATABASE=testdb \
-  -p 3306:3306 \
-  mysql:8
-
-# Wait for MySQL to be ready
-until docker exec test-mysql mysqladmin ping -h localhost --silent; do
-  sleep 1
-done
-
-# Run integration tests
-TEST_MYSQL_DSN="root:pass@tcp(localhost:3306)/testdb?parseTime=true" \
-  go test -tags=integration -v ./...
-
-# Clean up
-docker rm -f test-mysql
-```
-
-## Integration Test Setup
-
-```go
-//go:build integration
-
-package mysqlrepo_test
-
-import (
-    "os"
-    "testing"
-)
-
-func TestMain(m *testing.M) {
-    dsn := os.Getenv("TEST_MYSQL_DSN")
-    if dsn == "" {
-        // Skip integration tests if DSN not set
-        os.Exit(0)
-    }
-    
-    // Setup database connection
-    // Run migrations if needed
-    
-    code := m.Run()
-    
-    // Cleanup
-    
-    os.Exit(code)
-}
-```
-
----
-
-# Coverage
-
-```bash
-# Generate coverage profile
-go test -coverprofile=coverage.out ./...
-
-# View coverage in terminal
-go tool cover -func=coverage.out
-
-# View coverage in browser
-go tool cover -html=coverage.out
-
-# Coverage for specific packages
-go test -coverprofile=coverage.out -coverpkg=./internal/... ./...
-```
-
----
-
-# Race Detection
-
-```bash
-# Run tests with race detector
-go test -race ./...
-
-# Race detection with specific test
-go test -race -run TestConcurrentAccess ./...
-```
-
----
-
-# Benchmarks
-
-```bash
-# Run all benchmarks
-go test -bench=. ./...
-
-# Run specific benchmark
-go test -bench=BenchmarkOrderCreation ./internal/domain/order/...
-
-# Benchmarks with memory allocation stats
-go test -bench=. -benchmem ./...
-
-# Run benchmark multiple times
-go test -bench=. -count=5 ./...
-```
-
----
-
-# Test Caching
-
-```bash
-# Force re-run (disable cache)
-go test -count=1 ./...
-
-# Clean test cache
-go clean -testcache
-```
-
----
-
-# Makefile Targets
-
-```makefile
-.PHONY: test test-unit test-integration test-coverage
-
-test: test-unit
-
-test-unit:
-	go test -v -race ./...
-
-test-integration:
-	go test -tags=integration -v ./...
-
-test-coverage:
-	go test -coverprofile=coverage.out ./...
-	go tool cover -html=coverage.out -o coverage.html
-```
-
----
-
 # Troubleshooting
 
 | Issue | Cause | Fix |
 |-------|-------|-----|
 | Tests skipped | Missing env vars | Set `TEST_MYSQL_DSN` etc. |
+| Tests silently missing | Forgot build tags | Always use `-tags=integration,component,e2e` |
 | Connection refused | DB not running | Start container, wait for ready |
 | Race detected | Concurrent access | Add mutex or redesign |
 | Flaky tests | Shared state / timing | Use `t.Parallel()`, fix timing |
 | Slow tests | No parallelization | Add `t.Parallel()` |
 | Cache issues | Stale results | Use `-count=1` or clean cache |
 | "FailNow from non-test goroutine" | `require` in goroutine | Use `assert` instead |
-
----
-
-# Example Requests
-
-| User Request | Action |
-|--------------|--------|
-| "Run the tests" | `go test -v ./...` |
-| "Run tests with coverage" | `go test -cover ./...` then `go tool cover -html` |
-| "Run only integration tests" | `go test -tags=integration -v ./...` |
-| "Check for race conditions" | `go test -race ./...` |
-| "Run a specific test" | `go test -v -run TestName ./path/...` |
-| "Benchmark this function" | `go test -bench=BenchmarkName -benchmem ./...` |
-| "Why are tests slow?" | Check for missing `t.Parallel()`, use `-p 1` for isolation |
-| "Write a test for this function" | Use GIVEN-WHEN-THEN structure with fixture pattern |
-| "Should I use table-driven tests?" | Only if simple data variations, 3-4 fields max |
