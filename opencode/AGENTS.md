@@ -56,6 +56,8 @@ Load skills with the `skill` tool when needed.
 **Tools:**
 
 - `docker-best-practices` - Dockerfiles, multi-stage builds, container security
+- `gitlab-mr` - GitLab merge request descriptions
+- `commit` - Git commit messages in conventional format
 
 ### When to Load Skills
 
@@ -67,6 +69,8 @@ Load skills with the `skill` tool when needed.
 | Security concerns         | `go-security`           |
 | Generating mocks          | `go-mocks`              |
 | Writing Dockerfiles       | `docker-best-practices` |
+| Creating a GitLab MR      | `gitlab-mr`             |
+| Making a git commit       | `commit`                |
 
 ### Missing Skills
 
