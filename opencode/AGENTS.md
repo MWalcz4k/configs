@@ -49,6 +49,7 @@ Load skills with the `skill` tool when needed.
 
 - `go-idioms` - Patterns, error handling, interfaces, naming
 - `go-test` - Testing patterns and table-driven tests
+- `go-run-tests` - Running the test suite (Makefile-first, with integration/component tags)
 - `go-benchmarks` - Writing and running benchmarks (b.Loop, b.N, benchstat)
 - `go-security` - Security best practices
 - `go-mocks` - Mock generation with mockgen
@@ -65,6 +66,7 @@ Load skills with the `skill` tool when needed.
 | ------------------------- | ----------------------- |
 | Writing Go code           | `go-idioms`             |
 | Writing/running tests     | `go-test`               |
+| Running the test suite    | `go-run-tests`          |
 | Writing/running benchmarks| `go-benchmarks`         |
 | Security concerns         | `go-security`           |
 | Generating mocks          | `go-mocks`              |
