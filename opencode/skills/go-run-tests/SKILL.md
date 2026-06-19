@@ -21,37 +21,45 @@ Look for a `Makefile` in the project root.
 
 **If no Makefile exists → go to [Fallback](#fallback-no-makefile-or-no-test-targets).**
 
-### Step 2 — Inspect Makefile for test targets
+### Step 2 — Scan for the well-known targets
 
-Scan the Makefile for targets whose names or recipes relate to testing.
-Look for patterns like: `test`, `test-unit`, `test-integration`, `test-component`,
-`integration-test`, `component-test`, `run-tests`, `check`, etc.
+Check whether **any** of these exact target names exist in the Makefile:
 
-**If no test-related targets exist → go to [Fallback](#fallback-no-makefile-or-no-test-targets).**
+| Target | Scope |
+|--------|-------|
+| `integration` | Integration tests |
+| `integration-test` | Integration tests |
+| `e2e` | End-to-end tests |
+| `component-test` | Component tests |
 
-### Step 3 — Identify what test targets cover
+**If none of these targets exist and there is no other test-related target → go to [Fallback](#fallback-no-makefile-or-no-test-targets).**
 
-For each test target found, determine whether it covers:
+### Step 3 — Find the primary test target
 
-| Scope | Keywords to look for in target name or recipe |
-|-------|-----------------------------------------------|
-| Unit tests | `unit`, `go test` without special tags, general `test` |
-| Integration tests | `integration`, `integration-test`, `test-integration` |
-| Component tests | `component`, `component-test`, `test-component` |
+Look for a general test target in the Makefile: `test`, `tests`, `unit`, `run-tests`, `check`, or a target whose recipe calls `go test`.
 
-### Step 4 — Run the appropriate Makefile targets
+### Step 4 — Run targets
 
-- **Always run the primary/unit test target** (e.g., `make test`).
-- **If integration tests have a dedicated target** → also run it (e.g., `make test-integration`).
-- **If component tests have a dedicated target** → also run it (e.g., `make test-component`).
+- **Always run the primary test target first** (e.g., `make test`). If no primary target exists but well-known targets do, skip this step.
+- **For every well-known target that exists** (`integration`, `integration-test`, `e2e`, `component-test`), run it — always, unconditionally.
 - Run each target separately so failures are easy to isolate.
 
-Example (when all three scopes have dedicated targets):
+Example (primary target + all well-known targets present):
 
 ```bash
 make test
-make test-integration
-make test-component
+make integration
+make integration-test
+make e2e
+make component-test
+```
+
+Example (only some well-known targets present):
+
+```bash
+make test
+make integration
+make e2e
 ```
 
 ---
@@ -89,8 +97,7 @@ tags will be silently skipped otherwise.
 ## Rules
 
 - **Always check the Makefile first.** Do not jump straight to `go test`.
-- **Always run integration AND component tests** — either via Makefile targets
-  or via build tags in the fallback command.
+- **Always run every well-known target that exists** — no skipping.
 - Never run only unit tests and call it done.
 - If a Makefile target fails, report the error immediately; do not silently
   fall back to `go test`.
