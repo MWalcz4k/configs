@@ -3,7 +3,7 @@ name: go-run-tests
 description: >
   Running Go tests in a project. Load when asked to run tests, execute the test
   suite, verify tests pass, or check test results. Triggers: run tests, execute
-  tests, make test, go test, run the test suite, run integration tests, run
+  tests, go test, run the test suite, run integration tests, run
   component tests, check if tests pass.
 license: MIT
 compatibility: opencode
@@ -32,22 +32,16 @@ Check whether **any** of these exact target names exist in the Makefile:
 | `e2e` | End-to-end tests |
 | `component-test` | Component tests |
 
-**If none of these targets exist and there is no other test-related target → go to [Fallback](#fallback-no-makefile-or-no-test-targets).**
+**If none of these targets exist → go to [Fallback](#fallback-no-makefile-or-no-test-targets).**
 
-### Step 3 — Find the primary test target
+### Step 3 — Run targets
 
-Look for a general test target in the Makefile: `test`, `tests`, `unit`, `run-tests`, `check`, or a target whose recipe calls `go test`.
-
-### Step 4 — Run targets
-
-- **Always run the primary test target first** (e.g., `make test`). If no primary target exists but well-known targets do, skip this step.
 - **For every well-known target that exists** (`integration`, `integration-test`, `e2e`, `component-test`), run it — always, unconditionally.
 - Run each target separately so failures are easy to isolate.
 
-Example (primary target + all well-known targets present):
+Example (all well-known targets present):
 
 ```bash
-make test
 make integration
 make integration-test
 make e2e
@@ -57,7 +51,6 @@ make component-test
 Example (only some well-known targets present):
 
 ```bash
-make test
 make integration
 make e2e
 ```

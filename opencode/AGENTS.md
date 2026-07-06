@@ -19,7 +19,7 @@ Personal rules that apply across all OpenCode sessions.
 - Always ask for confirmation before making any git commits or pushes
 - Always ask before pushing any docker images to a registry
 - Always ask before adding new dependencies to the project (for instance new Go modules)
-- Always run `make test` as the final step of any implementation to make sure tests are passing
+- Always run the test suite as the final step of any implementation (use the `go-run-tests` skill to determine the right targets)
 
 ## Skill Loading
 
