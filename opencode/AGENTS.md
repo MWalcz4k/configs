@@ -19,6 +19,7 @@ Personal rules that apply across all OpenCode sessions.
 - Always ask for confirmation before making any git commits or pushes
 - Always ask before pushing any docker images to a registry
 - Always ask before adding new dependencies to the project (for instance new Go modules)
+- After changing Go code, load `go-lint`, run the project's lint command, and fix lint failures before running tests
 - Always run the test suite as the final step of any implementation (use the `go-run-tests` skill to determine the right targets)
 
 ## Skill Loading
@@ -37,7 +38,7 @@ Skills follow the pattern `<language>-<skill>` for language-specific skills:
 
 | Language | Prefix    | Examples                              |
 | -------- | --------- | ------------------------------------- |
-| Go       | `go-`     | `go-idioms`, `go-test`, `go-security` |
+| Go       | `go-`     | `go-idioms`, `go-test`, `go-lint` |
 
 Language-agnostic skills have no prefix: `docker-best-practices`
 
@@ -50,8 +51,8 @@ Load skills with the `skill` tool when needed.
 - `go-idioms` - Patterns, error handling, interfaces, naming
 - `go-test` - Testing patterns and table-driven tests
 - `go-run-tests` - Running the test suite (Makefile-first, with integration/component tags)
+- `go-lint` - Running and fixing Go lint checks (Makefile-first, golangci-lint fallback)
 - `go-benchmarks` - Writing and running benchmarks (b.Loop, b.N, benchstat)
-- `go-security` - Security best practices
 - `go-mocks` - Mock generation with mockgen
 
 **Tools:**
@@ -67,8 +68,8 @@ Load skills with the `skill` tool when needed.
 | Writing Go code           | `go-idioms`             |
 | Writing/running tests     | `go-test`               |
 | Running the test suite    | `go-run-tests`          |
+| Changing Go code          | `go-lint`               |
 | Writing/running benchmarks| `go-benchmarks`         |
-| Security concerns         | `go-security`           |
 | Generating mocks          | `go-mocks`              |
 | Writing Dockerfiles       | `docker-best-practices` |
 | Creating a GitLab MR      | `gitlab-mr`             |
