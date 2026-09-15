@@ -170,18 +170,13 @@ edit it, only inspect it to flag risks in the MR description. It's usually a
 sibling directory, e.g. `~/workspace/<service-name>` (find it, don't guess).
 
 ```bash
-grep -E "gokit/activity|gokit/broker|mongoclient" go.mod
+grep -E "gokit/activity|gokit/broker" go.mod
 ```
 
 Requirements from the OIDC migration guide:
 
 - `gokit/broker >= v0.40`
 - `gokit/activity >= v0.2.0` (if used)
-- `gokit/dbfactory/mongoclient/v2 >= v2.3.1` (fixes the driver swapping the
-  k8s OIDC token for the AWS web identity token via
-  `AWS_WEB_IDENTITY_TOKEN_FILE`)
-- `mongoclient/v2 >= v2.4.1` if the app uses aggregation pipelines and any
-  Mongo `_id` fields are decoded into Go `string` (BSONOptions bug in v2.4.0)
 
 If any dependency is below threshold, **do not silently proceed** — call it
 out explicitly in the MR description as a blocker for production rollout.
@@ -226,5 +221,5 @@ impacted — don't leave a live incident sitting in draft.
 - [ ] Forgot to add `AWS_ACCOUNT_ID`/`AWS_REGION` when they weren't already present
 - [ ] Put the new env vars before `AWS_ACCOUNT_ID`/`ENV` are defined → `$(...)` interpolation breaks
 - [ ] Didn't verify both `prod` and `stage` overlays with `kubectl kustomize`
-- [ ] Didn't check the app repo's `gokit/broker`/`mongoclient` versions
+- [ ] Didn't check the app repo's `gokit/broker` version
 - [ ] Edited the application source repo instead of just inspecting it (out of scope for `batman-configs` work unless explicitly asked)
