@@ -61,6 +61,7 @@ Load skills with the `skill` tool when needed.
 - `gitlab-mr` - GitLab merge request descriptions
 - `commit` - Git commit messages in conventional format
 - `aws-oidc-migration` - Migrate batman-configs services from static AWS keys to OIDC/IRSA
+- `jira-task` - Create Jira tasks in the TECH project (efgcloud.atlassian.net)
 
 ### When to Load Skills
 
@@ -76,6 +77,7 @@ Load skills with the `skill` tool when needed.
 | Creating a GitLab MR      | `gitlab-mr`             |
 | Making a git commit       | `commit`                |
 | Migrating a service to AWS OIDC | `aws-oidc-migration` |
+| Creating a Jira task     | `jira-task`              |
 
 ### Missing Skills
 

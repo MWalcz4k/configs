@@ -1,6 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
-"autoupdate": true, 
+  "autoupdate": true,
   "permission": {
     "external_directory": {
       "~/workspace/**": "allow",
@@ -13,6 +13,13 @@
     "edit": {
       "*": "allow",
       "~/go/pkg/mod/**": "deny"
+    }
+  },
+  "mcp": {
+    "jira": {
+      "type": "remote",
+      "url": "https://mcp.atlassian.com/v1/mcp",
+      "enabled": true
     }
   }
 }
