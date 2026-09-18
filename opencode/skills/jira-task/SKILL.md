@@ -57,7 +57,13 @@ Each section is a heading followed by an `info` panel:
       "type": "panel",
       "attrs": { "panelType": "info" },
       "content": [
-        { "type": "paragraph", "content": [{ "type": "text", "text": "<description text>" }] }
+        {
+          "type": "bulletList",
+          "content": [
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "<description point 1>" }] }] },
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "<description point 2>" }] }] }
+          ]
+        }
       ]
     },
     { "type": "heading", "attrs": { "level": 3 }, "content": [{ "type": "text", "text": "Acceptance Criteria" }] },
@@ -96,8 +102,8 @@ Each section is a heading followed by an `info` panel:
 
 Notes on ADF construction:
 
-- Use `bulletList` (as above) for Acceptance Criteria — it's almost always a
-  list, not prose.
+- Use `bulletList` for Description and Acceptance Criteria — both should
+  default to bullets over prose paragraphs.
 - Multiple paragraphs within one panel are allowed — just add more
   `paragraph` nodes to that panel's `content` array.
 - Every `panel` must have `attrs.panelType: "info"`.
@@ -120,7 +126,9 @@ Notes on ADF construction:
 
 ## Style
 
-- Description: 2-4 sentences, plain prose.
+- Description: keep it short — prefer a bulleted list over prose paragraphs.
+  Only fall back to 1-2 short sentences if the content genuinely doesn't
+  break into bullets.
 - Acceptance Criteria: bullet points, testable/verifiable statements, not
   vague ("Users can filter by date" not "Filtering works well").
 - Technical Solution / Design: can include bullet points if there are
