@@ -59,6 +59,7 @@ Load skills with the `skill` tool when needed.
 
 - `docker-best-practices` - Dockerfiles, multi-stage builds, container security
 - `gitlab-mr` - GitLab merge request descriptions
+- `gitlab-mr-review` - Post inline review comments on a GitLab MR's diff lines
 - `commit` - Git commit messages in conventional format
 - `aws-oidc-migration` - Migrate batman-configs services from static AWS keys to OIDC/IRSA
 - `jira-task` - Create Jira tasks in the TECH project (efgcloud.atlassian.net)
@@ -75,6 +76,7 @@ Load skills with the `skill` tool when needed.
 | Generating mocks          | `go-mocks`              |
 | Writing Dockerfiles       | `docker-best-practices` |
 | Creating a GitLab MR      | `gitlab-mr`             |
+| Reviewing an MR / posting inline comments | `gitlab-mr-review` |
 | Making a git commit       | `commit`                |
 | Migrating a service to AWS OIDC | `aws-oidc-migration` |
 | Creating a Jira task     | `jira-task`              |
