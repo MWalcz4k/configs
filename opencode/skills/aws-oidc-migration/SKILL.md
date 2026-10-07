@@ -59,11 +59,23 @@ In `base/deployment_base.yaml`, remove ONLY the AWS-specific env vars from
 **Do NOT blindly delete the whole `vault-init` block.** Check first whether
 `vault-init` fetches any OTHER secrets (e.g. `SECRET_MYSQL_DSN`,
 `SECRET_MONGODB_CSFLE_*`, `SECRET_API_MIXPANEL_TOKEN`, etc. — check base AND
-both overlays). Two cases:
+both overlays). Three cases:
 
-- **Other secrets remain** → just delete the two `SECRET_AWS_*` lines, leave
-  `vault-init` and its other env vars untouched.
-- **AWS keys were the ONLY secrets** → the `vault-env` binary hard-crashes
+- **Other secrets remain in base** → just delete the two `SECRET_AWS_*` lines,
+  leave `vault-init` and its other env vars untouched.
+- **Base has no secrets left, but an overlay still adds `SECRET_*` to
+  vault-init** (e.g. flags-api: base had only AWS keys, prod/stage overlays add
+  `SECRET_MCP_AUTH_TOKEN`) → delete the **entire** `initContainers:` /
+  `- name: vault-init` / `env:` block from base. Do NOT leave an empty `env:`
+  behind, and do NOT use `$patch: delete` here (it would drop the container the
+  overlays still need).
+
+  ⚠️ An empty `env:` (or any key with nothing under it) is YAML `null`, and
+  `null` in a strategic-merge patch **deletes the whole field** — it wiped all
+  of vault-init's commons env (`VAULT_ADDR`, `VAULT_LOGIN_ROLE`, `FACEIT_ENV`,
+  `K8S_SERVICE_ACCOUNT`, …) and took flags-api prod down with
+  `If VAULT_LOGIN_ROLE is not found, you must specify FACEIT_ENV and K8S_SERVICE_ACCOUNT`.
+- **AWS keys were the ONLY secrets anywhere (base + overlays)** → the `vault-env` binary hard-crashes
   with `Did you forget to specify the SECRET_<...>` when it has zero
   `SECRET_*`/`SECRETFILE_*` vars. You MUST delete the whole `vault-init`
   initContainer via strategic-merge patch (list merge key is `name`):
@@ -82,6 +94,39 @@ both overlays). Two cases:
   `Init:CrashLoopBackOff` in production. If a migration already merged and
   is crash-looping, this is the first thing to check
   (`kubectl logs -n <ns> <pod> -c vault-init --previous`).
+
+### Step 2b — VaultStaticSecret-based services
+
+Some services get AWS keys from a `VaultStaticSecret` (often
+`base/vault_static_secret_base.yaml`) via `destination.transformation.templates`
+instead of vault-init:
+
+```yaml
+transformation:
+  excludes:
+    - .*
+  templates:
+    AWS_ACCESS_KEY_ID:
+      text: "{{ .Secrets.aws_access_key_id }}"
+    AWS_SECRET_ACCESS_KEY:
+      text: "{{ .Secrets.aws_secret_access_key }}"
+```
+
+Remove the AWS template entries. If `templates` ends up empty, **delete the
+`templates` key entirely** — never write `templates: {}` or `templates:`.
+Flux applies it as `null`, the CRD rejects it
+(`spec.destination.transformation.templates ... must be of type object: "null"`),
+and because Flux dry-runs the whole namespace Kustomization, **one invalid
+object blocks every deploy in that team's namespace** (this happened to
+team-blue via third-party-user-importer and blocked the flags-api hotfix).
+
+If the Deployment still references the secret (`envFrom.secretRef` /
+`secretKeyRef`), keep the VaultStaticSecret so the Secret still exists, even if
+it's now empty.
+
+**General rule for this whole migration:** after removing entries, never leave
+a key whose value is empty (`key:`, `key: {}`, `key: []`) in a patch file.
+Remove the key itself. (Legit exceptions: `emptyDir: {}` in a volume.)
 
 ## Step 3 — Add the OIDC env vars
 
@@ -161,6 +206,30 @@ grep -c "SECRET_AWS"     /tmp/prod.yaml   # expect 0
 grep -A5 "name: vault-init" /tmp/prod.yaml  # if kept, confirm it still has >=1 SECRET_* var
 ```
 
+grep alone is NOT enough. It misses the null-wipe bugs above. Also check the
+rendered objects structurally:
+
+```bash
+python3 - /tmp/prod.yaml <<'EOF'
+import yaml,sys
+for d in yaml.safe_load_all(open(sys.argv[1])):
+    if not d: continue
+    if d['kind']=='Deployment':
+        for c in d['spec']['template']['spec'].get('initContainers') or []:
+            if c['name']=='vault-init':
+                n={e['name'] for e in c.get('env') or []}
+                miss={'VAULT_LOGIN_ROLE','FACEIT_ENV','K8S_SERVICE_ACCOUNT'}-n
+                assert not miss, f"vault-init lost commons env: {miss}"
+                assert any(x.startswith('SECRET_') for x in n), "vault-init has no SECRET_*"
+    if d['kind']=='VaultStaticSecret':
+        t=(d['spec'].get('destination') or {}).get('transformation') or {}
+        assert 'templates' not in t or t['templates'], "empty VSS templates -> null, breaks Flux"
+print("OK")
+EOF
+```
+
+Also run `git diff` and eyeball every hunk for a key left with nothing under it.
+
 Do this for both prod and stage overlays for every service being migrated.
 
 ## Step 6 — Check the app repo's dependencies (read-only, informational only)
@@ -209,15 +278,33 @@ kubectl describe pod -n <namespace> <pod>
 kubectl logs -n <namespace> <pod> -c vault-init --previous
 ```
 
-If the log says `Did you forget to specify the SECRET_<...>`, this is the
-Step 2 mistake — go delete the `vault-init` initContainer entirely (see Step
-2, case 2). Branch off latest `origin/master` (the broken change is already
+Map the log to the cause:
+
+- `Did you forget to specify the SECRET_<...>` → vault-init has zero secrets →
+  delete the `vault-init` initContainer entirely (Step 2, last case).
+- `If VAULT_LOGIN_ROLE is not found, you must specify FACEIT_ENV and K8S_SERVICE_ACCOUNT`
+  → an empty `env:` in the base vault-init patch nulled out the commons env →
+  remove the leftover empty block (Step 2, middle case).
+
+**If the fix merged but pods don't change**, Flux probably isn't applying the
+namespace at all. Check:
+
+```bash
+kubectl get kustomizations.kustomize.toolkit.fluxcd.io -n flux-system <team>
+```
+
+If it's `False` with a dry-run error on some other object (e.g. a
+VaultStaticSecret with `templates: null`), that object is blocking the whole
+namespace. Fix it too (Step 2b). Branch off latest `origin/master` (the broken change is already
 merged), fix, and open a **non-draft** MR since production is actively
 impacted — don't leave a live incident sitting in draft.
 
 ## Common mistakes checklist
 
 - [ ] Deleted only the AWS lines but left `vault-init` with zero secrets → crash loop
+- [ ] Left an empty `env:` under vault-init in base → nulls commons vault env → `VAULT_LOGIN_ROLE is not found` crash
+- [ ] Left `templates: {}` / empty `templates:` in a VaultStaticSecret → Flux dry-run fails for the whole namespace
+- [ ] Used `$patch: delete` on vault-init while an overlay still adds secrets to it
 - [ ] Forgot to add `AWS_ACCOUNT_ID`/`AWS_REGION` when they weren't already present
 - [ ] Put the new env vars before `AWS_ACCOUNT_ID`/`ENV` are defined → `$(...)` interpolation breaks
 - [ ] Didn't verify both `prod` and `stage` overlays with `kubectl kustomize`
