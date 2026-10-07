@@ -64,6 +64,10 @@ Load skills with the `skill` tool when needed.
 - `aws-oidc-migration` - Migrate batman-configs services from static AWS keys to OIDC/IRSA
 - `jira-task` - Create Jira tasks in the TECH project (efgcloud.atlassian.net)
 
+**Output Style:**
+
+- `i-have-adhd` - ADHD-friendly output: action first, numbered steps, no fluff. Manual only; stays on until "stop adhd mode"
+
 ### When to Load Skills
 
 | Task                      | Load Skill              |
@@ -80,6 +84,7 @@ Load skills with the `skill` tool when needed.
 | Making a git commit       | `commit`                |
 | Migrating a service to AWS OIDC | `aws-oidc-migration` |
 | Creating a Jira task     | `jira-task`              |
+| User says "/i-have-adhd" or "adhd mode" | `i-have-adhd` |
 
 ### Missing Skills
 
