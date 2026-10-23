@@ -35,9 +35,25 @@ with a `go.mod` at the root (or in a subdir). Skip Java/Maven (`pom.xml`),
 Node, and other non-Go repos entirely — don't verify, approve, or merge them;
 list them under "Skipped (not Go)" in the final summary.
 
+**Ignore archived repositories.** Archived projects can't be merged into and
+their Renovate MRs are stale noise. Check each distinct project before doing
+anything else with it:
+
+```bash
+glab api projects/<project_id> | jq -r .archived   # true => ignore
+```
+
+Drop archived projects entirely: don't clone, verify, approve, or merge them.
+List them under "Skipped / blocked" in the final summary with reason "archived".
+
 Show the list to me as a table (repo, MR, title) and track each MR as a todo.
 Process same-repo MRs back-to-back; after merging one, the others in that
 repo usually need a rebase.
+
+**Batching: work on at most 3 repos at a time.** Take the next 3 repos (with
+all their MRs), fully finish them (verify, push, pipeline, ask me, merge or
+skip), and only then start the next batch of up to 3. Never verify or run
+tests for more than 3 repos in one go.
 
 ## 2. Ensure repos are cloned
 
@@ -166,7 +182,7 @@ Output:
 | Repo | Last tag | Commits since tag | Notes (major bump / lib vs service) |
 
 ## Skipped / blocked
-| Repo | MR | Reason |
+| Repo | MR | Reason (incl. "archived") |
 
 ## Skipped (not Go)
 | Repo | MR | Language |
