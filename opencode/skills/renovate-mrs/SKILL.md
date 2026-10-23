@@ -83,6 +83,22 @@ If anything fails, summarise the error and propose a fix, then use the
 it manually** (wait, then re-verify), **Skip this MR**, **Redundant – delete branch**.
 Never push a fix without my OK.
 
+### Flaky tests
+
+If a test fails intermittently (passes on re-run, or the failure is unrelated
+to the dependency bump — timing, ordering, shared state, races, ports, time.Now):
+
+1. Confirm flakiness: `go test -run '^TestName$' -count=20 -race ./pkg/...`.
+2. Find the root cause and fix it properly (sync instead of `time.Sleep`,
+   `t.Parallel()` isolation, deterministic ordering, `t.Cleanup`, fake clocks).
+   Don't just add retries or skip the test.
+3. Re-run with `-count=20 -race` to prove it's stable, then lint.
+4. Show me the fix, and after I confirm, commit it **into the Renovate branch** as a
+   separate commit (`commit` skill style, e.g. `test(<pkg>): fix flaky TestX`)
+   and push with `--force-with-lease`. Fixing a flaky test is fine even if
+   it's unrelated to the bump.
+5. Note it in the final summary (column "Extra fixes").
+
 ### Redundant MRs
 
 If an MR is redundant (already applied on master, superseded by a newer
@@ -144,7 +160,7 @@ Output:
 
 ```
 ## Merged
-| Repo | MR | Title |
+| Repo | MR | Title | Extra fixes (flaky tests etc.) |
 
 ## Needs release
 | Repo | Last tag | Commits since tag | Notes (major bump / lib vs service) |
