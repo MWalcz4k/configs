@@ -63,6 +63,7 @@ Load skills with the `skill` tool when needed.
 - `commit` - Git commit messages in conventional format
 - `aws-oidc-migration` - Migrate batman-configs services from static AWS keys to OIDC/IRSA
 - `jira-task` - Create Jira tasks in the TECH project (efgcloud.atlassian.net)
+- `renovate-mrs` - Verify, rebase, approve and merge Renovate MRs (Go repos only) + release summary
 
 **Output Style:**
 
@@ -84,6 +85,7 @@ Load skills with the `skill` tool when needed.
 | Making a git commit       | `commit`                |
 | Migrating a service to AWS OIDC | `aws-oidc-migration` |
 | Creating a Jira task     | `jira-task`              |
+| Processing Renovate MRs  | `renovate-mrs`           |
 | User says "/i-have-adhd" or "adhd mode" | `i-have-adhd` |
 
 ### Missing Skills
