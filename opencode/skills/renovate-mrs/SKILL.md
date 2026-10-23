@@ -80,8 +80,21 @@ grep the code for broken APIs, and expect code changes.
 
 If anything fails, summarise the error and propose a fix, then use the
 `question` tool with options: **Fix it** (apply fix, re-run checks), **I'll fix
-it manually** (wait, then re-verify), **Skip this MR**, **Close MR**.
+it manually** (wait, then re-verify), **Skip this MR**, **Redundant – delete branch**.
 Never push a fix without my OK.
+
+### Redundant MRs
+
+If an MR is redundant (already applied on master, superseded by a newer
+Renovate MR, stale digest, etc.), **do NOT close the MR** — Renovate treats a
+closed MR as "ignore this update forever". Instead delete the source branch
+(after my confirmation); GitLab closes the MR automatically and Renovate
+recreates it later if still relevant:
+
+```bash
+git push origin --delete <source_branch>
+# or: glab api -X DELETE "projects/<id>/repository/branches/$(jq -rn --arg b <source_branch> '$b|@uri')"
+```
 
 ### d. Push
 
