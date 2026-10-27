@@ -24,7 +24,8 @@ approving and merging **non-breaking** MRs. Do it without asking.
 
 **Non-breaking (auto: commit, push, approve, merge):**
 - Patch/minor bumps of Go modules, Docker base images, CI images, tools.
-- Go toolchain **patch** bumps (e.g. `1.24.3` → `1.24.5`).
+- Go toolchain **patch and minor** bumps (e.g. `1.24.3` → `1.24.5`,
+  `1.24` → `1.25`), including `go`/`toolchain` directive changes.
 - Branch changes limited to: rebase, `go.mod`/`go.sum` regeneration
   (`go mod tidy`, re-applied `go get`), lint autofixes with no behaviour change.
 - Flaky-test fixes touching only `_test.go` files / test helpers.
@@ -34,8 +35,6 @@ approving and merging **non-breaking** MRs. Do it without asking.
 **Potentially breaking (STOP and ask me via `question` before commit/push/merge):**
 - Any **major** bump (`/vN` module path change, `to vN` with new major, v0.x minor
   bumps — in semver v0 a minor is allowed to break).
-- Go toolchain **minor** bumps (e.g. `1.24` → `1.25`) and `go`/`toolchain`
-  directive changes in a library that consumers import.
 - Any change to non-test production code (API adaptations, renamed calls,
   behaviour changes), or changes to config, migrations, Dockerfiles, CI, Helm.
 - Changelog/release notes mention breaking changes, deprecations removed,
