@@ -21,6 +21,8 @@ last path segment). Do NOT use go workspaces or vendor.
 
 For this skill only, I pre-approve committing, pushing (`--force-with-lease`),
 approving and merging **non-breaking** MRs. Do it without asking.
+Pre-approval covers commit/push/approve/merge only — the AGENTS.md
+Pre-Commit Review still runs before every commit.
 
 **Non-breaking (auto: commit, push, approve, merge):**
 - Patch/minor bumps of Go modules, Docker base images, CI images, tools.

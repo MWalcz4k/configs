@@ -1,8 +1,53 @@
 ---
 description: Go code review specialist. Reviews Go code for correctness, idiomatic patterns, security, and performance following Effective Go and best practices. Use before committing or creating PRs.
-tools:
-  write: false
-  edit: false
+mode: subagent
+model: claude-agent/opus#medium
+permissions:
+  - action: edit
+    resource: "*"
+    effect: deny
+  - action: shell
+    resource: "*"
+    effect: deny
+  - action: shell
+    resource: "cd *"
+    effect: allow
+  - action: shell
+    resource: "ls *"
+    effect: allow
+  - action: shell
+    resource: "git diff *"
+    effect: allow
+  - action: shell
+    resource: "git status *"
+    effect: allow
+  - action: shell
+    resource: "git log *"
+    effect: allow
+  - action: shell
+    resource: "git show *"
+    effect: allow
+  - action: shell
+    resource: "go vet *"
+    effect: allow
+  - action: shell
+    resource: "git -C * diff *"
+    effect: allow
+  - action: shell
+    resource: "git -C * status *"
+    effect: allow
+  - action: shell
+    resource: "git -C * log *"
+    effect: allow
+  - action: shell
+    resource: "git -C * show *"
+    effect: allow
+  - action: shell
+    resource: "git *--output*"
+    effect: deny
+  - action: shell
+    resource: "go vet *-vettool*"
+    effect: deny
 ---
 
 # Go Code Reviewer Agent

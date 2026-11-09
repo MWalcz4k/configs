@@ -54,6 +54,12 @@ go test -tags=integration,component,e2e ./...
 
 Do NOT commit if tests are failing.
 
+## Pre-Commit: Independent Review
+
+**ALWAYS run the subagent review before committing** — follow the "Pre-Commit Review" section in the global `AGENTS.md` (`go-code-reviewer` for Go files, `reviewer` for everything else, both for mixed diffs).
+
+Do NOT commit while any Critical/Major finding is unresolved, unless the human explicitly waived that specific finding.
+
 ## Examples
 
 ```
