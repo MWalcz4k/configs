@@ -21,8 +21,8 @@ Use this skill when creating a GitLab merge request description.
 
 ## Summary
 
-- <High-level change 1>
-- <High-level change 2>
+- <What this MR achieves and why>
+- <Further high-level outcome, if any>
 - ...
 
 ## Breaking Changes
@@ -37,7 +37,7 @@ Use this skill when creating a GitLab merge request description.
 ## Rules
 
 - **Task**: Extract the Jira ticket number from the current branch name (e.g. `feature/PROJ-123-some-thing` → `PROJ-123`). If no ticket is found, leave it blank and ask the user.
-- **Summary**: Bullet points only. High-level summary of what changed — not an exhaustive list of every decision made. Write for someone who wasn't in the weeds — they should understand *what* changed and *why*, not *how*.
+- **Summary**: Always required. Bullet points only. Must make the clear intent behind the MR obvious — *why* it exists and *what* it achieves — so it can be understood without any knowledge of the code. Do not mention edited files, functions, types, or other code internals (user-facing names like endpoints, env vars or service names are fine when they clarify intent). High-level, not an exhaustive list of every decision made — explain *what* and *why*, not *how*.
 - **Breaking Changes**: List anything that breaks backward compatibility (API changes, removed fields, renamed config keys, changed behavior). **Omit this section entirely if there are none.**
 - **New Required Config**: List any new environment variables or config values that are required to run the application after this change. Include the variable name and a short description. **Omit this section entirely if there are none.**
 
@@ -45,4 +45,4 @@ Use this skill when creating a GitLab merge request description.
 
 - Keep it short and scannable.
 - No walls of text.
-- Past tense for changes ("Added", "Removed", "Updated", "Fixed").
+- Past tense, outcome-focused (e.g. "Fixed duplicate payouts when retries overlap").
